@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 40 33% 98%;
+  --foreground: 290 80% 15%;
+  --primary: 296 82% 18%;
+  --primary-foreground: 0 0% 98%;
+  --accent: 174 68% 50%;
+  --accent-foreground: 0 0% 98%;
+  --border: 290 10% 88%;
+  --input: 290 10% 88%;
+  --ring: 296 82% 18%;
+  --muted: 290 10% 95%;
+  --muted-foreground: 290 10% 45%;
+}
+
+@layer base {
+  html {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/40 backdrop-blur-md border border-white/10;
+  }
+
+  @keyframes gradient-move {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .btn-premium {
+    @apply relative overflow-hidden px-8 py-3 rounded-[10px] font-bold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-2;
+    background-size: 200% 200%;
+  }
+
+  .btn-primary {
+    @apply btn-premium text-white hover:shadow-primary/30;
+    background-image: linear-gradient(-45deg, #4A0E4E, #5C1660, #4A0E4E, #6B1F6F);
+    animation: gradient-move 5s ease infinite;
+  }
+
+  .btn-accent {
+    @apply btn-premium text-white hover:shadow-accent/30;
+    background-image: linear-gradient(-45deg, #2BC1A4, #3DD4B7, #2BC1A4, #1EA895);
+    animation: gradient-move 5s ease infinite;
+  }
+
+  .btn-outline {
+    @apply btn-premium border border-primary/30 text-primary hover:text-white hover:border-transparent transition-all;
+    background-image: linear-gradient(-45deg, transparent, rgba(74, 14, 78, 0.05), transparent, rgba(74, 14, 78, 0.1));
+    animation: gradient-move 5s ease infinite;
+  }
+
+  .btn-white {
+    @apply btn-premium bg-white text-primary hover:shadow-white/20;
+    background-image: linear-gradient(-45deg, #ffffff, #f9fafb, #ffffff, #f3f4f6);
+    animation: gradient-move 5s ease infinite;
+  }
+
+  @keyframes marquee-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee-scroll {
+    animation: marquee-scroll 30s linear infinite;
+  }
+
+  .animate-marquee-scroll:hover {
+    animation-play-state: paused;
+  }
+}
+

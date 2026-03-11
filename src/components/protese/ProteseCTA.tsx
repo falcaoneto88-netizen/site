@@ -1,0 +1,51 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { MessageCircle } from 'lucide-react';
+import { EditableText, EditableElement } from '../EditableWrappers';
+import { EditableSectionColors, ColorDef } from '../EditableSectionColors';
+import { WHATSAPP_URL } from '../../lib/constants';
+
+const CTA_COLORS: ColorDef[] = [
+    { id: 'bg', label: 'Fundo', defaultColor: '#540247', cssProperty: 'backgroundColor' },
+    { id: 'title', label: 'Título', defaultColor: '#FFFFFF', cssProperty: 'color' },
+    { id: 'text', label: 'Texto', defaultColor: '#FFFFFFCC', cssProperty: 'color' },
+    { id: 'btnBg', label: 'Botão', defaultColor: '#16a34a', cssProperty: 'backgroundColor' },
+];
+
+export const ProteseCTA = () => {
+    return (
+        <EditableSectionColors sectionId="proteseCTA" colors={CTA_COLORS}>
+            {(colors) => (
+                <section className="py-14 md:py-24 relative overflow-hidden" style={{ backgroundColor: colors.bg }}>
+                    <div className="absolute inset-0 z-0">
+                        <img src="/assets/real-photos/office_bg_cta.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.08]" loading="lazy" />
+                    </div>
+                    <div className="absolute inset-0 z-[1]">
+                        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[150px]" />
+                        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-white/5 rounded-full blur-[120px]" />
+                    </div>
+                    <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
+                        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-4xl mx-auto flex flex-col items-center">
+                            <EditableElement id="protesecta_title_el" label="Título">
+                                <h2 className="text-2xl md:text-[30px] font-serif uppercase tracking-wider mb-4 md:mb-6 leading-tight" style={{ color: colors.title }}>
+                                    <EditableText id="protese_cta_title" defaultText="Reabilite seu sorriso com conforto, segurança e naturalidade" />
+                                </h2>
+                            </EditableElement>
+                            <EditableElement id="protesecta_desc_el" label="Descrição">
+                                <div style={{ color: colors.text }}>
+                                    <EditableText id="protese_cta_desc" as="p" defaultText="Se você sente dificuldade ao mastigar, desconforto estético ou deseja melhorar a funcionalidade do seu sorriso, agende sua avaliação na Oral Unic. Nossa equipe está pronta para indicar a melhor solução para o seu caso." className="text-sm mb-8 md:mb-12 font-light max-w-2xl mx-auto block" />
+                                </div>
+                            </EditableElement>
+                            <EditableElement id="protesecta_btn_el" label="Botão CTA">
+                                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-white text-sm md:text-base px-8 md:px-10 py-3 md:py-4 rounded-full font-semibold hover:opacity-90 transition-all shadow-lg" style={{ backgroundColor: colors.btnBg }}>
+                                    <MessageCircle className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2.5} />
+                                    <EditableText id="protese_cta_btn" defaultText="Fale com um atendente" />
+                                </a>
+                            </EditableElement>
+                        </motion.div>
+                    </div>
+                </section>
+            )}
+        </EditableSectionColors>
+    );
+};
