@@ -1,5 +1,5 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { supabase as supabaseClient } from '../integrations/supabase/client';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { falcaoDefaults } from '../data/falcaoDefaults';
 
 interface EditorContextType {
   isEditMode: boolean;
@@ -24,52 +24,26 @@ const parseStoredContent = (raw: string | null): Record<string, unknown> => {
   }
 };
 
-const STORAGE_VERSION = 'v2';
+const STORAGE_VERSION = 'v3';
 const getStorageKey = (pid: string) => `editor_draft_${pid}_${STORAGE_VERSION}`;
-const getCacheKey = (pid: string) => `editor_cache_${pid}_${STORAGE_VERSION}`;
-const getLegacyStorageKey = (pid: string) => `editor_draft_${pid}`;
-const getLegacyCacheKey = (pid: string) => `editor_cache_${pid}`;
+const getPublishedKey = (pid: string) => `editor_published_${pid}_${STORAGE_VERSION}`;
 
 export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: string }> = ({ children, projectId = 'default' }) => {
   const STORAGE_KEY = getStorageKey(projectId);
-  const CACHE_KEY = getCacheKey(projectId);
-
-  // Resolve slug to UUID for DB operations
-  const [resolvedProjectId, setResolvedProjectId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId);
-    if (isUuid) {
-      setResolvedProjectId(projectId);
-      return;
-    }
-    supabaseClient.from('projects').select('id').eq('slug', projectId).maybeSingle().then(({ data }) => {
-      setResolvedProjectId(data?.id ?? null);
-    });
-  }, [projectId]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      window.localStorage.removeItem(getLegacyCacheKey(projectId));
-      window.localStorage.removeItem(getLegacyStorageKey(projectId));
-    } catch {
-      // noop
-    }
-  }, [projectId]);
+  const PUBLISHED_KEY = getPublishedKey(projectId);
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const cached = parseStoredContent(window.localStorage.getItem(getCacheKey(projectId)));
-    return Object.keys(cached).length > 0;
+
+  // Published = static defaults merged with any saved published overrides from localStorage
+  const [published, setPublished] = useState<Record<string, unknown>>(() => {
+    const saved = typeof window !== 'undefined'
+      ? parseStoredContent(window.localStorage.getItem(PUBLISHED_KEY))
+      : {};
+    return { ...falcaoDefaults, ...saved };
   });
 
-  const [published, setPublished] = useState<Record<string, unknown>>(() =>
-    typeof window === 'undefined' ? {} : parseStoredContent(window.localStorage.getItem(CACHE_KEY))
-  );
-
+  // Draft = in-progress edits not yet "published"
   const [draft, setDraft] = useState<Record<string, unknown>>(() =>
     typeof window === 'undefined' ? {} : parseStoredContent(window.localStorage.getItem(STORAGE_KEY))
   );
@@ -79,97 +53,22 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
       window.localStorage.setItem(key, value);
     } catch {
       try {
-        window.localStorage.removeItem(CACHE_KEY);
+        window.localStorage.removeItem(PUBLISHED_KEY);
         window.localStorage.removeItem(STORAGE_KEY);
         window.localStorage.setItem(key, value);
       } catch {
         console.warn(`[EditorSync] Não foi possível salvar no localStorage`);
       }
     }
-  }, [CACHE_KEY, STORAGE_KEY]);
+  }, [PUBLISHED_KEY, STORAGE_KEY]);
 
-  const fetchPublished = useCallback(async () => {
-    if (!resolvedProjectId) return;
-    try {
-      const { data, error } = await supabaseClient
-        .from('project_content')
-        .select('id, value, updated_at')
-        .eq('project_id', resolvedProjectId);
-
-      if (error || !data || data.length === 0) {
-        setIsLoaded(true);
-        return;
-      }
-
-      const map: Record<string, unknown> = {};
-      data.forEach((row: any) => {
-        map[row.id] = row.value;
-      });
-
-      setPublished(map);
-      safeSetItem(CACHE_KEY, JSON.stringify(map));
-      setIsLoaded(true);
-    } catch (err) {
-      console.error('[EditorSync] Erro:', err);
-      setIsLoaded(true);
-    }
-  }, [safeSetItem, resolvedProjectId, CACHE_KEY]);
-
-  const hasSyncedRef = useRef(false);
-  const lastRealtimeSyncRef = useRef<number>(0);
-  useEffect(() => {
-    if (!resolvedProjectId || hasSyncedRef.current) return;
-    hasSyncedRef.current = true;
-    // Clear stale cache before fetching fresh data
-    try { window.localStorage.removeItem(CACHE_KEY); } catch {}
-    fetchPublished();
-  }, [fetchPublished, resolvedProjectId, CACHE_KEY]);
-
-  useEffect(() => {
-    if (!resolvedProjectId) return;
-
-    const channel = supabaseClient
-      .channel(`content_changes_${resolvedProjectId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'project_content',
-          filter: `project_id=eq.${resolvedProjectId}`,
-        },
-        () => {
-          lastRealtimeSyncRef.current = Date.now();
-          fetchPublished();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabaseClient.removeChannel(channel);
-    };
-  }, [fetchPublished, resolvedProjectId]);
-
-  useEffect(() => {
-    if (!resolvedProjectId || typeof window === 'undefined') return;
-
-    const interval = window.setInterval(() => {
-      const msSinceRealtime = Date.now() - lastRealtimeSyncRef.current;
-      if (msSinceRealtime > 6000) {
-        fetchPublished();
-      }
-    }, 6000);
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [fetchPublished, resolvedProjectId]);
-
+  // Persist drafts to localStorage
   useEffect(() => {
     if (typeof window === 'undefined') return;
     safeSetItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft, safeSetItem, STORAGE_KEY]);
 
+  // Merge published + draft for the active content
   const content = useMemo(() => {
     const hasDraft = isEditMode && Object.keys(draft).length > 0;
     if (!hasDraft) return published;
@@ -187,48 +86,32 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
     });
   }, []);
 
+  // "Publish" saves overrides to localStorage (no Supabase)
   const publishChanges = useCallback(async () => {
-    if (Object.keys(draft).length === 0 || !resolvedProjectId) return;
-    // Check auth before attempting publish
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-      alert('Você precisa fazer login para publicar alterações. Acesse a página de autenticação primeiro.');
-      return;
-    }
+    if (Object.keys(draft).length === 0) return;
     setIsPublishing(true);
     try {
-      const entries = Object.entries(draft);
-      const { error: upsertError } = await supabaseClient
-        .from('project_content')
-        .upsert(
-          entries.map(([id, value]) => ({
-            id,
-            project_id: resolvedProjectId,
-            value: value as any,
-            updated_at: new Date().toISOString(),
-          })),
-          { onConflict: 'id,project_id' }
-        );
-
-      if (upsertError) {
-        console.error('Erro ao publicar:', upsertError.message);
-        alert(`Erro ao publicar: ${upsertError.message}`);
-        return;
-      }
-
       const newPublished = { ...published, ...draft };
       setPublished(newPublished);
       setDraft({});
-      safeSetItem(CACHE_KEY, JSON.stringify(newPublished));
+
+      // Save only the overrides (differences from falcaoDefaults) to save space
+      const overrides: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(newPublished)) {
+        if (JSON.stringify(falcaoDefaults[key]) !== JSON.stringify(value)) {
+          overrides[key] = value;
+        }
+      }
+      safeSetItem(PUBLISHED_KEY, JSON.stringify(overrides));
       window.localStorage.removeItem(STORAGE_KEY);
-      alert('Alterações publicadas com sucesso!');
+      alert('Alterações salvas com sucesso!');
     } catch (err) {
-      console.error('Erro ao publicar:', err);
-      alert('Erro ao publicar. Tente novamente.');
+      console.error('Erro ao salvar:', err);
+      alert('Erro ao salvar. Tente novamente.');
     } finally {
       setIsPublishing(false);
     }
-  }, [draft, published, resolvedProjectId, safeSetItem, CACHE_KEY, STORAGE_KEY]);
+  }, [draft, published, safeSetItem, PUBLISHED_KEY, STORAGE_KEY]);
 
   const clearChanges = useCallback(() => {
     setDraft({});
@@ -236,8 +119,8 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
   }, [STORAGE_KEY]);
 
   const value = useMemo(
-    () => ({ isEditMode, toggleEditMode, content, updateContent, publishChanges, clearChanges, isPublishing, isLoaded }),
-    [isEditMode, content, updateContent, publishChanges, clearChanges, isPublishing, isLoaded]
+    () => ({ isEditMode, toggleEditMode, content, updateContent, publishChanges, clearChanges, isPublishing, isLoaded: true }),
+    [isEditMode, content, updateContent, publishChanges, clearChanges, isPublishing]
   );
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;

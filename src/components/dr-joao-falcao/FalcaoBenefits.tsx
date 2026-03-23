@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Images, Plus, Trash2, X, Upload, Loader2 } from 'lucide-react';
 import { EditableText, EditableImage, EditableElement } from '../EditableWrappers';
 import { useEditor } from '../../context/EditorContext';
-import { supabase } from '../../integrations/supabase/client';
+
 
 const DEFAULT_RESULTS = [
   { id: 'falcao_res_1', src: '/assets/real-photos/transformation_harmony_1.png', label: 'Harmonização Corporal' },
@@ -53,21 +53,21 @@ const CarouselManager: React.FC<{ open: boolean; onClose: () => void; carouselKe
     const uploadId = index !== undefined ? `replace-${index}` : 'new';
     setUploading(uploadId);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const fileName = `carousel_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${ext}`;
-      const { error } = await supabase.storage.from('editor-images').upload(fileName, file, { upsert: true });
-      if (error) { alert('Erro no upload.'); return; }
-      const { data: urlData } = supabase.storage.from('editor-images').getPublicUrl(fileName);
-      const url = urlData.publicUrl;
-
-      if (index !== undefined) {
-        const next = [...images];
-        next[index] = { ...next[index], src: url };
-        setImages(next);
-      } else {
-        setImages([...images, { id: `falcao_res_${Date.now()}`, src: url, label: 'Nova imagem' }]);
-      }
-    } catch { alert('Erro no upload.'); } finally { setUploading(null); }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const url = reader.result as string;
+        if (index !== undefined) {
+          const next = [...images];
+          next[index] = { ...next[index], src: url };
+          setImages(next);
+        } else {
+          setImages([...images, { id: `falcao_res_${Date.now()}`, src: url, label: 'Nova imagem' }]);
+        }
+        setUploading(null);
+      };
+      reader.onerror = () => { alert('Erro ao ler imagem.'); setUploading(null); };
+      reader.readAsDataURL(file);
+    } catch { alert('Erro no upload.'); setUploading(null); }
   }, [images, setImages]);
 
   const removeImage = useCallback((index: number) => {

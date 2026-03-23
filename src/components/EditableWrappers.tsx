@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom';
 import { useEditor } from '../context/EditorContext';
 import { cn } from '../lib/utils';
-import { supabase } from '../integrations/supabase/client';
 import {
   Upload, Link, X, RotateCcw, Type, EyeOff, Eye,
   AlignLeft, AlignCenter, AlignRight, Bold, Minus, Plus,
@@ -620,29 +619,21 @@ export const EditableImage: React.FC<EditableImageProps> = ({ id, defaultSrc, al
 
       setIsUploading(true);
       try {
-        const ext = file.name.split('.').pop() || 'jpg';
-        const fileName = `${id}_${Date.now()}.${ext}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('editor-images')
-          .upload(fileName, file, { upsert: true });
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          alert('Erro ao fazer upload. Tente novamente.');
-          return;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from('editor-images')
-          .getPublicUrl(fileName);
-
-        updateContent(id, urlData.publicUrl);
+        const reader = new FileReader();
+        reader.onload = () => {
+          updateContent(id, reader.result as string);
+          setIsUploading(false);
+        };
+        reader.onerror = () => {
+          alert('Erro ao ler a imagem.');
+          setIsUploading(false);
+        };
+        reader.readAsDataURL(file);
       } catch (err) {
         console.error('Upload error:', err);
         alert('Erro ao fazer upload.');
-      } finally {
         setIsUploading(false);
+      } finally {
         event.target.value = '';
       }
     },
