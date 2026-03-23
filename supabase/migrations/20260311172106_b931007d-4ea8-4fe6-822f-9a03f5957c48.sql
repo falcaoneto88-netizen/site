@@ -1,0 +1,3 @@
+UPDATE project_content SET value = '"O Método "' WHERE id = 'falcao_diff_title_1' AND project_id = '577b551a-ed62-40fb-a8f3-f98a0c404afe';
+UPDATE project_content SET value = '"Le Contour Premium"' WHERE id = 'falcao_diff_title_accent' AND project_id = '577b551a-ed62-40fb-a8f3-f98a0c404afe';
+UPDATE project_content SET value = '"Criado pelo Dr. João Falcão, o método Le Contour Premium é referência mundial em remodelação glútea — com mais de +5.000 bumbuns transformados e +1.000 alunos formados em todo o mundo."' WHERE id = 'falcao_diff_desc' AND project_id = '577b551a-ed62-40fb-a8f3-f98a0c404afe';

@@ -59,7 +59,7 @@ export const FalcaoEvaluation = () => {
             <EditableText
               id="falcao_eval_desc_mobile"
               as="p"
-              className="text-sm text-white/50 leading-relaxed mb-8 font-light block"
+              className="text-sm text-white leading-relaxed mb-8 font-light block"
               defaultText="O primeiro passo é uma consulta de avaliação com o Dr. João Falcão. Durante esse encontro você poderá:"
             />
 
@@ -76,14 +76,14 @@ export const FalcaoEvaluation = () => {
                   <div className="w-5 h-5 rounded-full bg-[#C9A96E]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Check className="w-3 h-3 text-[#C9A96E]" />
                   </div>
-                  <span className="text-white/60 text-sm">
+                   <span className="text-white text-sm">
                     <EditableText id={`${step.id}_mobile`} defaultText={step.text} />
                   </span>
                 </motion.div>
               ))}
             </div>
 
-            <p className="text-sm text-white/50 leading-relaxed font-light">
+            <p className="text-sm text-white leading-relaxed font-light">
               <EditableText id="falcao_eval_footer_mobile_1" defaultText="É nesse momento que começamos a desenhar a " />
               <span className="text-[#C9A96E] font-serif italic">
                 <EditableText id="falcao_eval_footer_mobile_accent" defaultText="transformação que você deseja" />
@@ -127,7 +127,7 @@ export const FalcaoEvaluation = () => {
         </div>
 
         {/* Content left */}
-        <div className="max-w-[1600px] mx-auto w-full px-6 relative z-30">
+        <div className="max-w-[1600px] mx-auto w-full px-6 pl-[5%] xl:pl-[8%] relative z-30">
           <div className="max-w-lg lg:max-w-xl">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -142,7 +142,7 @@ export const FalcaoEvaluation = () => {
                 </span>
               </div>
 
-              <h2 className="text-2xl md:text-[30px] font-light leading-[1.15] mb-8 text-white">
+              <h2 className="text-2xl md:text-[36px] font-light leading-[1.15] mb-8 text-white">
                 <EditableText id="falcao_eval_title_desktop_1" defaultText="Como funciona a " />
                 <span className="font-serif italic text-[#C9A96E]">
                   <EditableText id="falcao_eval_title_desktop_accent" defaultText="avaliação?" />
@@ -152,7 +152,7 @@ export const FalcaoEvaluation = () => {
               <EditableText
                 id="falcao_eval_desc_desktop"
                 as="p"
-                className="text-sm md:text-base text-white/50 leading-relaxed mb-8 font-light max-w-lg block"
+                className="text-sm md:text-lg text-white leading-relaxed mb-8 font-light max-w-lg block"
                 defaultText="O primeiro passo é uma consulta de avaliação com o Dr. João Falcão. Durante esse encontro você poderá:"
               />
 
@@ -169,14 +169,14 @@ export const FalcaoEvaluation = () => {
                     <div className="w-5 h-5 rounded-full bg-[#C9A96E]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check className="w-3 h-3 text-[#C9A96E]" />
                     </div>
-                    <span className="text-white/60 text-sm">
+                     <span className="text-white text-base">
                       <EditableText id={`${step.id}_desktop`} defaultText={step.text} />
                     </span>
                   </motion.div>
                 ))}
               </div>
 
-              <p className="text-sm md:text-base text-white/50 leading-relaxed font-light">
+              <p className="text-sm md:text-lg text-white leading-relaxed font-light">
                 <EditableText id="falcao_eval_footer_desktop_1" defaultText="É nesse momento que começamos a desenhar a " />
                 <span className="text-[#C9A96E] font-serif italic">
                   <EditableText id="falcao_eval_footer_desktop_accent" defaultText="transformação que você deseja" />

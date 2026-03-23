@@ -24,16 +24,47 @@ const parseStoredContent = (raw: string | null): Record<string, unknown> => {
   }
 };
 
-const getStorageKey = (pid: string) => `editor_draft_${pid}`;
-const getCacheKey = (pid: string) => `editor_cache_${pid}`;
+const STORAGE_VERSION = 'v2';
+const getStorageKey = (pid: string) => `editor_draft_${pid}_${STORAGE_VERSION}`;
+const getCacheKey = (pid: string) => `editor_cache_${pid}_${STORAGE_VERSION}`;
+const getLegacyStorageKey = (pid: string) => `editor_draft_${pid}`;
+const getLegacyCacheKey = (pid: string) => `editor_cache_${pid}`;
 
 export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: string }> = ({ children, projectId = 'default' }) => {
   const STORAGE_KEY = getStorageKey(projectId);
   const CACHE_KEY = getCacheKey(projectId);
 
+  // Resolve slug to UUID for DB operations
+  const [resolvedProjectId, setResolvedProjectId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(projectId);
+    if (isUuid) {
+      setResolvedProjectId(projectId);
+      return;
+    }
+    supabaseClient.from('projects').select('id').eq('slug', projectId).maybeSingle().then(({ data }) => {
+      setResolvedProjectId(data?.id ?? null);
+    });
+  }, [projectId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.removeItem(getLegacyCacheKey(projectId));
+      window.localStorage.removeItem(getLegacyStorageKey(projectId));
+    } catch {
+      // noop
+    }
+  }, [projectId]);
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const cached = parseStoredContent(window.localStorage.getItem(getCacheKey(projectId)));
+    return Object.keys(cached).length > 0;
+  });
 
   const [published, setPublished] = useState<Record<string, unknown>>(() =>
     typeof window === 'undefined' ? {} : parseStoredContent(window.localStorage.getItem(CACHE_KEY))
@@ -58,13 +89,17 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
   }, [CACHE_KEY, STORAGE_KEY]);
 
   const fetchPublished = useCallback(async () => {
+    if (!resolvedProjectId) return;
     try {
       const { data, error } = await supabaseClient
         .from('project_content')
         .select('id, value, updated_at')
-        .eq('project_id', projectId);
+        .eq('project_id', resolvedProjectId);
 
-      if (error || !data || data.length === 0) return;
+      if (error || !data || data.length === 0) {
+        setIsLoaded(true);
+        return;
+      }
 
       const map: Record<string, unknown> = {};
       data.forEach((row: any) => {
@@ -73,34 +108,62 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
 
       setPublished(map);
       safeSetItem(CACHE_KEY, JSON.stringify(map));
+      setIsLoaded(true);
     } catch (err) {
       console.error('[EditorSync] Erro:', err);
+      setIsLoaded(true);
     }
-  }, [safeSetItem, projectId, CACHE_KEY]);
+  }, [safeSetItem, resolvedProjectId, CACHE_KEY]);
 
   const hasSyncedRef = useRef(false);
+  const lastRealtimeSyncRef = useRef<number>(0);
   useEffect(() => {
-    if (hasSyncedRef.current) return;
+    if (!resolvedProjectId || hasSyncedRef.current) return;
     hasSyncedRef.current = true;
-    const hasCachedContent = Object.keys(published).length > 0;
-    if (hasCachedContent) {
-      setTimeout(fetchPublished, 3000);
-    } else {
-      fetchPublished();
-    }
-  }, [fetchPublished]);
+    // Clear stale cache before fetching fresh data
+    try { window.localStorage.removeItem(CACHE_KEY); } catch {}
+    fetchPublished();
+  }, [fetchPublished, resolvedProjectId, CACHE_KEY]);
 
   useEffect(() => {
+    if (!resolvedProjectId) return;
+
     const channel = supabaseClient
-      .channel(`content_changes_${projectId}`)
+      .channel(`content_changes_${resolvedProjectId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'project_content' },
-        () => fetchPublished()
+        {
+          event: '*',
+          schema: 'public',
+          table: 'project_content',
+          filter: `project_id=eq.${resolvedProjectId}`,
+        },
+        () => {
+          lastRealtimeSyncRef.current = Date.now();
+          fetchPublished();
+        }
       )
       .subscribe();
-    return () => { supabaseClient.removeChannel(channel); };
-  }, [fetchPublished, projectId]);
+
+    return () => {
+      supabaseClient.removeChannel(channel);
+    };
+  }, [fetchPublished, resolvedProjectId]);
+
+  useEffect(() => {
+    if (!resolvedProjectId || typeof window === 'undefined') return;
+
+    const interval = window.setInterval(() => {
+      const msSinceRealtime = Date.now() - lastRealtimeSyncRef.current;
+      if (msSinceRealtime > 6000) {
+        fetchPublished();
+      }
+    }, 6000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [fetchPublished, resolvedProjectId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -108,10 +171,10 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
   }, [draft, safeSetItem, STORAGE_KEY]);
 
   const content = useMemo(() => {
-    const hasDraft = Object.keys(draft).length > 0;
+    const hasDraft = isEditMode && Object.keys(draft).length > 0;
     if (!hasDraft) return published;
     return { ...published, ...draft };
-  }, [published, draft]);
+  }, [published, draft, isEditMode]);
 
   const toggleEditMode = () => setIsEditMode((prev) => !prev);
 
@@ -125,7 +188,13 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
   }, []);
 
   const publishChanges = useCallback(async () => {
-    if (Object.keys(draft).length === 0) return;
+    if (Object.keys(draft).length === 0 || !resolvedProjectId) return;
+    // Check auth before attempting publish
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      alert('Você precisa fazer login para publicar alterações. Acesse a página de autenticação primeiro.');
+      return;
+    }
     setIsPublishing(true);
     try {
       const entries = Object.entries(draft);
@@ -134,11 +203,11 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
         .upsert(
           entries.map(([id, value]) => ({
             id,
-            project_id: projectId,
+            project_id: resolvedProjectId,
             value: value as any,
             updated_at: new Date().toISOString(),
           })),
-          { onConflict: 'id' }
+          { onConflict: 'id,project_id' }
         );
 
       if (upsertError) {
@@ -159,7 +228,7 @@ export const EditorProvider: React.FC<{ children: React.ReactNode; projectId?: s
     } finally {
       setIsPublishing(false);
     }
-  }, [draft, published, projectId, safeSetItem, CACHE_KEY, STORAGE_KEY]);
+  }, [draft, published, resolvedProjectId, safeSetItem, CACHE_KEY, STORAGE_KEY]);
 
   const clearChanges = useCallback(() => {
     setDraft({});

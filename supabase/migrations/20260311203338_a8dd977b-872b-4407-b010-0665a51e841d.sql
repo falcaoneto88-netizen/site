@@ -1,0 +1,1 @@
+UPDATE projects SET template = 'marcio-freitas' WHERE id = '22a5ae90-6818-4140-86b0-ef17745ad7e2';

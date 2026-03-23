@@ -12,13 +12,14 @@ import HomePreview from './pages/HomePreview';
 import Links from './pages/Links';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
+import DrJoaoFalcao from './pages/DrJoaoFalcao';
 
 function App() {
     return (
         <BrowserRouter>
             <Routes>
                 {/* Dashboard and Auth */}
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/" element={<Auth />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
 
@@ -35,17 +36,8 @@ function App() {
                 <Route path="/projeto/:slug/facetas-resina" element={<FacetasResina />} />
                 <Route path="/projeto/:slug/harmonizacao" element={<HarmonizacaoOrofacial />} />
 
-                {/* Legacy / Direct Routes */}
-                <Route path="/implantes" element={<ImplantesDentarios />} />
-                <Route path="/ortodontia" element={<Ortodontia />} />
-                <Route path="/endodontia" element={<Endodontia />} />
-                <Route path="/protese-dentaria" element={<ProteseDentaria />} />
-                <Route path="/clinico-geral" element={<ClinicoGeral />} />
-                <Route path="/periodontia" element={<Periodontia />} />
-                <Route path="/facetas-resina" element={<FacetasResina />} />
-                <Route path="/harmonizacao" element={<HarmonizacaoOrofacial />} />
+                {/* Utility Routes */}
                 <Route path="/links" element={<Links />} />
-                <Route path="/v1" element={<ExportPages />} />
             </Routes>
         </BrowserRouter>
     );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Layers } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -29,13 +29,6 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        // Admin Bypass for the requested access
-        if (email === 'admin@admin.com' && password === 'admin123') {
-          console.log('Admin bypass triggered');
-          navigate('/dashboard');
-          return;
-        }
-
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
@@ -55,26 +48,40 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[hsl(296,82%,8%)] via-[hsl(296,82%,14%)] to-[hsl(290,60%,20%)] px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Site Builder</h1>
-          <p className="text-white/60 mt-2">Crie sites profissionais para seus clientes</p>
+    <div className="min-h-screen flex items-center justify-center bg-black px-4">
+      {/* Subtle grid pattern */}
+      <div className="fixed inset-0 opacity-[0.03]" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
+        backgroundSize: '60px 60px',
+      }} />
+
+      <div className="relative w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white mb-4">
+            <Layers className="w-6 h-6 text-black" />
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Site Builder</h1>
+          <p className="text-white/40 text-sm mt-1.5">Gerencie os sites dos seus clientes</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
-          <div className="flex mb-8 bg-white/5 rounded-xl p-1">
+        {/* Card */}
+        <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-8">
+          {/* Tabs */}
+          <div className="flex mb-8 bg-white/[0.04] rounded-xl p-1">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${isLogin ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 hover:text-white/70'
-                }`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isLogin ? 'bg-white text-black shadow-sm' : 'text-white/40 hover:text-white/60'
+              }`}
             >
               Entrar
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${!isLogin ? 'bg-white/15 text-white shadow-sm' : 'text-white/50 hover:text-white/70'
-                }`}
+              className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                !isLogin ? 'bg-white text-black shadow-sm' : 'text-white/40 hover:text-white/60'
+              }`}
             >
               Criar conta
             </button>
@@ -82,14 +89,14 @@ const Auth = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="text-white/70 text-sm mb-1.5 block">Email</label>
+              <label className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2 block">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/25 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/10 transition-all text-sm"
                   placeholder="seu@email.com"
                   required
                 />
@@ -97,14 +104,14 @@ const Auth = () => {
             </div>
 
             <div>
-              <label className="text-white/70 text-sm mb-1.5 block">Senha</label>
+              <label className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2 block">Senha</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-12 text-white placeholder:text-white/25 focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20 transition-all"
+                  className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl py-3 pl-11 pr-12 text-white placeholder:text-white/20 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/10 transition-all text-sm"
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -112,7 +119,7 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/50 transition"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -128,13 +135,17 @@ const Auth = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[hsl(174,68%,50%)] to-[hsl(174,68%,40%)] text-white font-semibold py-3.5 rounded-xl hover:opacity-90 disabled:opacity-50 transition-all shadow-lg shadow-[hsl(174,68%,50%)]/20"
+              className="w-full flex items-center justify-center gap-2 bg-white text-black font-semibold py-3.5 rounded-xl hover:bg-white/90 disabled:opacity-50 transition-all text-sm"
             >
               {loading ? 'Aguarde...' : isLogin ? 'Entrar' : 'Criar conta'}
               {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
         </div>
+
+        <p className="text-center text-white/20 text-xs mt-6">
+          © {new Date().getFullYear()} Site Builder
+        </p>
       </div>
     </div>
   );

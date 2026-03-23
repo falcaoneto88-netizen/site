@@ -6,33 +6,28 @@ import { EditableText } from '../EditableWrappers';
 const faqs = [
   {
     id: 'falcao_faq_1',
-    question: 'A rinomodelação glútea dói?',
-    answer: 'O procedimento é realizado com anestesia local, tornando-o praticamente indolor. Pode haver um leve desconforto nos primeiros dias, facilmente controlado com medicações simples.',
+    question: 'O método é seguro?',
+    answer: 'Sim. Ele é realizado com protocolos seguros e avaliados por profissionais.',
   },
   {
     id: 'falcao_faq_2',
-    question: 'Quanto tempo dura o resultado?',
-    answer: 'Os resultados duram em média de 18 a 24 meses, podendo variar de acordo com o metabolismo de cada paciente. É possível fazer manutenções periódicas para manter o resultado.',
+    question: 'Quanto tempo dura?',
+    answer: 'Os resultados costumam durar até 18 meses, dependendo do metabolismo e das características individuais de cada paciente. É possível realizar manutenções periódicas quando desejar para preservar e manter o resultado.',
   },
   {
     id: 'falcao_faq_3',
-    question: 'Qual o tempo de recuperação?',
-    answer: 'A recuperação é rápida. A maioria dos pacientes retorna às atividades normais em 24 a 48 horas. Atividades físicas intensas devem ser evitadas por 15 dias.',
+    question: 'Quantas sessões são necessárias?',
+    answer: 'Cada corpo é único. Durante a avaliação, analisamos fatores como: estrutura corporal, volume desejado, qualidade da pele e proporção glútea. Com base nisso, definimos um plano personalizado para atingir o melhor resultado possível.',
   },
   {
     id: 'falcao_faq_4',
-    question: 'O procedimento é seguro?',
-    answer: 'Sim. Utilizamos ácido hialurônico de alta qualidade, um produto biocompatível que já é amplamente utilizado na medicina estética há décadas. O procedimento é realizado em ambiente clínico controlado.',
+    question: 'O resultado é imediato?',
+    answer: 'Sim. A paciente já consegue visualizar melhora no formato e no volume dos glúteos imediatamente após o procedimento.',
   },
   {
     id: 'falcao_faq_5',
-    question: 'Quantas sessões são necessárias?',
-    answer: 'Geralmente, uma sessão é suficiente para alcançar o resultado desejado. Em alguns casos, pode ser indicada uma sessão complementar após 30 dias para ajustes finos.',
-  },
-  {
-    id: 'falcao_faq_6',
-    question: 'Quem pode fazer o procedimento?',
-    answer: 'A maioria das pessoas saudáveis pode realizar o procedimento. Na avaliação personalizada, verificamos contraindicações como gestação, alergias específicas ou condições de saúde que possam interferir.',
+    question: 'Existe tempo de recuperação?',
+    answer: 'Não. O procedimento foi desenvolvido para não exigir afastamento das atividades diárias. A maioria das pacientes retorna à rotina no mesmo dia, seguindo apenas algumas orientações simples para otimizar o resultado.',
   },
 ];
 
@@ -51,10 +46,10 @@ export const FalcaoFAQ = () => {
             <span className="inline-block w-8 h-[1px] bg-[#C9A96E]" />
           </div>
 
-          <h2 className="text-2xl md:text-[30px] font-light leading-[1.15] text-white">
+          <h2 className="text-2xl md:text-[36px] font-light leading-[1.15] text-white">
             <EditableText id="falcao_faq_title_1" defaultText="Perguntas " />
             <span className="font-serif italic text-[#C9A96E]">
-              <EditableText id="falcao_faq_title_accent" defaultText="mais comuns" />
+              <EditableText id="falcao_faq_title_accent" defaultText="Frequentes" />
             </span>
           </h2>
         </div>
@@ -89,7 +84,7 @@ export const FalcaoFAQ = () => {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <p className="px-6 pb-5 text-white/40 text-sm leading-relaxed">
+                    <p className="px-6 pb-5 text-white text-sm leading-relaxed">
                       <EditableText id={`${faq.id}_answer`} defaultText={faq.answer} />
                     </p>
                   </motion.div>

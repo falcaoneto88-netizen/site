@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { WhatsAppIcon } from './WhatsAppIcon';
 import { EditableText, EditableImage, EditableElement } from '../EditableWrappers';
 
 const navLinks = [
   { label: 'Procedimento', href: '#procedimento', id: 'falcao_nav_link_1' },
   { label: 'Benefícios', href: '#beneficios', id: 'falcao_nav_link_2' },
   { label: 'Dr. João Falcão', href: '#doutor', id: 'falcao_nav_link_3' },
-  { label: 'FAQ', href: '#faq', id: 'falcao_nav_link_4' },
+  { label: 'Dúvidas', href: '#faq', id: 'falcao_nav_link_4' },
 ];
 
 export const FalcaoNavbar = () => {
@@ -30,32 +31,21 @@ export const FalcaoNavbar = () => {
     >
       <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <EditableElement id="falcao_navbar_logo_el" label="Logo e Título">
-          <a href="#" className="flex items-center gap-3">
-            <EditableImage
-              id="falcao_navbar_logo"
-              defaultSrc="/assets/dr-joao-falcao/logo_jf.png"
-              alt="JF"
-              className="h-8 w-auto"
-            />
-            <div className="hidden sm:block">
-              <p className="text-white text-xs font-semibold leading-tight">
-                <EditableText id="falcao_navbar_title" defaultText="Dr. João Falcão" />
-              </p>
-              <p className="text-white/30 text-[9px] tracking-wider uppercase">
-                <EditableText id="falcao_navbar_subtitle" defaultText="Body Aesthetics" />
-              </p>
-            </div>
-          </a>
-        </EditableElement>
+        <a href="#" className="flex-shrink-0">
+          <img
+            src="/assets/dr-joao-falcao/logo_jf_gold.png"
+            alt="Dr. João Falcão"
+            className="h-6 sm:h-8 w-auto object-contain"
+          />
+        </a>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-12">
           {navLinks.map((link) => (
             <a
               key={link.id}
               href={link.href}
-              className="text-white/50 hover:text-white text-xs tracking-wide transition"
+              className="text-white hover:text-[#C9A96E] text-base tracking-wide transition"
             >
               <EditableText id={link.id} defaultText={link.label} />
             </a>
@@ -66,11 +56,12 @@ export const FalcaoNavbar = () => {
         <div className="flex items-center gap-4">
           <EditableElement id="falcao_navbar_cta_el" label="Botão Menu">
             <a
-              href="https://wa.me/5575999999999"
+              href="https://wa.me/351926991096?text=Ol%C3%A1%2C%20vim%20do%20Instagram%20e%20gostaria%20de%20agendar%20uma%20consulta%20com%20o%20Dr.%20Jo%C3%A3o%20Falc%C3%A3o."
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-[#C9A96E] via-[#E8D5A3] to-[#C9A96E] text-[#0A0A0A] font-semibold px-5 py-2 rounded-full hover:shadow-lg hover:shadow-[#C9A96E]/20 transition text-xs"
+              className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-[#C9A96E] via-[#E8D5A3] to-[#C9A96E] text-[#0A0A0A] font-semibold px-6 py-2.5 rounded-full hover:shadow-lg hover:shadow-[#C9A96E]/20 transition text-sm"
             >
+              <WhatsAppIcon className="w-4 h-4" />
               <EditableText id="falcao_navbar_cta_text" defaultText="Agendar" />
             </a>
           </EditableElement>
@@ -103,11 +94,12 @@ export const FalcaoNavbar = () => {
             </a>
           ))}
           <a
-            href="https://wa.me/5575999999999"
+            href="https://wa.me/351926991096?text=Ol%C3%A1%2C%20vim%20do%20Instagram%20e%20gostaria%20de%20agendar%20uma%20consulta%20com%20o%20Dr.%20Jo%C3%A3o%20Falc%C3%A3o."
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex w-full justify-center items-center gap-2 bg-gradient-to-r from-[#C9A96E] via-[#E8D5A3] to-[#C9A96E] text-[#0A0A0A] font-semibold px-5 py-3 rounded-full text-sm"
           >
+            <WhatsAppIcon className="w-4 h-4" />
             <EditableText id="falcao_navbar_cta_text_mobile" defaultText="Agendar Avaliação" />
           </a>
         </motion.div>

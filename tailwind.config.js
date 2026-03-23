@@ -28,6 +28,7 @@ export default {
             fontFamily: {
                 serif: ['"Playfair Display"', 'serif'],
                 sans: ['Poppins', 'sans-serif'],
+                prata: ['Prata', 'serif'],
             },
             fontSize: {
                 'xs': ['0.65rem', { lineHeight: '0.9rem' }],

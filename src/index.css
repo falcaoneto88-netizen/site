@@ -96,5 +96,15 @@
   .animate-marquee-scroll:hover {
     animation-play-state: paused;
   }
+
+  .editable-fade-content :is(h1, h2, h3, h4, h5, h6, p, span, a, button, li, label) {
+    position: relative;
+    z-index: 2;
+  }
+
+  .editable-fade-content :is(svg, i) {
+    position: relative;
+    z-index: 2;
+  }
 }
 

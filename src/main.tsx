@@ -44,7 +44,7 @@ class ErrorBoundary extends React.Component<
 
 // Safe cache flush
 try {
-  const CACHE_VERSION = 'cache_flush_v16';
+  const CACHE_VERSION = 'cache_flush_v19';
   if (!localStorage.getItem(CACHE_VERSION)) {
     Object.keys(localStorage).forEach(key => {
       if (key.includes('oral_unic') || key.includes('editor') || key.includes('cache_flush')) {
